@@ -7,6 +7,8 @@ from wxcloudrun import db
 class Counters(db.Model):
     # 设置结构体表格名称
     __tablename__ = 'Counters'
+    # 允许表重新定义
+    __table_args__ = {'extend_existing': True}
 
     # 设定结构体对应表格的字段
     id = db.Column(db.Integer, primary_key=True)
@@ -18,6 +20,7 @@ class Counters(db.Model):
 # 用户信息表
 class User(db.Model):
     __tablename__ = 'User'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     openid = db.Column(db.String(100), unique=True, nullable=False, comment='微信用户唯一标识')
@@ -32,6 +35,7 @@ class User(db.Model):
 # 旅游指南表
 class TravelGuide(db.Model):
     __tablename__ = 'TravelGuide'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(100), nullable=False, comment='指南标题')
@@ -48,6 +52,7 @@ class TravelGuide(db.Model):
 # 景点表
 class Attraction(db.Model):
     __tablename__ = 'Attraction'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False, comment='景点名称')
@@ -67,6 +72,7 @@ class Attraction(db.Model):
 # 收藏表
 class Favorite(db.Model):
     __tablename__ = 'Favorite'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False, comment='用户ID')
@@ -78,6 +84,7 @@ class Favorite(db.Model):
 # 行程计划表
 class TravelPlan(db.Model):
     __tablename__ = 'TravelPlan'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False, comment='用户ID')
@@ -92,6 +99,7 @@ class TravelPlan(db.Model):
 # 行程项目表
 class TravelPlanItem(db.Model):
     __tablename__ = 'TravelPlanItem'
+    __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     plan_id = db.Column(db.Integer, db.ForeignKey('TravelPlan.id'), nullable=False, comment='行程ID')
