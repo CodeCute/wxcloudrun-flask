@@ -6,14 +6,24 @@ from wxcloudrun.common.response import make_succ_response, make_err_response
 
 @app.route('/api/favorite/add', methods=['POST'])
 def add_favorite():
-    """添加收藏"""
+    """添加收藏 (从请求头获取openid)"""
     try:
+        # 从请求头获取openid
+        openid = request.headers.get('x-wx-openid', '')
+        if not openid:
+            return jsonify({'code': -1, 'msg': '缺少用户标识'})
+        
+        # 根据openid查询用户
+        user = get_user_by_openid(openid)
+        if not user:
+            return jsonify({'code': -1, 'msg': '用户不存在'})
+        
+        user_id = user.id
         data = request.get_json()
-        user_id = data.get('user_id')
         type = data.get('type')  # 'attraction' 或 'guide'
         item_id = data.get('item_id')
         
-        if not all([user_id, type, item_id]):
+        if not all([type, item_id]):
             return jsonify({'code': -1, 'msg': '缺少必要参数'})
         
         # 检查收藏对象是否存在
@@ -46,14 +56,24 @@ def add_favorite():
 
 @app.route('/api/favorite/remove', methods=['POST'])
 def remove_favorite():
-    """取消收藏"""
+    """取消收藏 (从请求头获取openid)"""
     try:
+        # 从请求头获取openid
+        openid = request.headers.get('x-wx-openid', '')
+        if not openid:
+            return jsonify({'code': -1, 'msg': '缺少用户标识'})
+        
+        # 根据openid查询用户
+        user = get_user_by_openid(openid)
+        if not user:
+            return jsonify({'code': -1, 'msg': '用户不存在'})
+        
+        user_id = user.id
         data = request.get_json()
-        user_id = data.get('user_id')
         type = data.get('type')
         item_id = data.get('item_id')
         
-        if not all([user_id, type, item_id]):
+        if not all([type, item_id]):
             return jsonify({'code': -1, 'msg': '缺少必要参数'})
         
         # 查找收藏记录
@@ -73,13 +93,20 @@ def remove_favorite():
 
 @app.route('/api/favorite/list', methods=['GET'])
 def get_favorites():
-    """获取用户收藏列表"""
+    """获取用户收藏列表 (从请求头获取openid)"""
     try:
-        user_id = request.args.get('user_id')
-        type = request.args.get('type')  # 可选，筛选收藏类型
+        # 从请求头获取openid
+        openid = request.headers.get('x-wx-openid', '')
+        if not openid:
+            return jsonify({'code': -1, 'msg': '缺少用户标识'})
         
-        if not user_id:
-            return jsonify({'code': -1, 'msg': '缺少用户ID参数'})
+        # 根据openid查询用户
+        user = get_user_by_openid(openid)
+        if not user:
+            return jsonify({'code': -1, 'msg': '用户不存在'})
+        
+        user_id = user.id
+        type = request.args.get('type')  # 可选，筛选收藏类型
         
         # 构建查询
         query = Favorite.query.filter_by(user_id=user_id)

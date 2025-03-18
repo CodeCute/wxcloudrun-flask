@@ -13,3 +13,11 @@ def init_app(app):
     from wxcloudrun.api import favorite
     from wxcloudrun.api import plan
     from wxcloudrun.api import initialize 
+    
+    # 新增API模块
+    from wxcloudrun.api import news
+    from wxcloudrun.api import companion
+    from wxcloudrun.api import social
+    from wxcloudrun.api import solution
+    from wxcloudrun.api import feedback
+    from wxcloudrun.api import search 

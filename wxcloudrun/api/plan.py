@@ -7,16 +7,26 @@ import datetime
 
 @app.route('/api/plan/create', methods=['POST'])
 def create_plan():
-    """创建旅行计划"""
+    """创建旅行计划 (从请求头获取openid)"""
     try:
+        # 从请求头获取openid
+        openid = request.headers.get('x-wx-openid', '')
+        if not openid:
+            return jsonify({'code': -1, 'msg': '缺少用户标识'})
+        
+        # 根据openid查询用户
+        user = get_user_by_openid(openid)
+        if not user:
+            return jsonify({'code': -1, 'msg': '用户不存在'})
+        
+        user_id = user.id
         data = request.get_json()
-        user_id = data.get('user_id')
         title = data.get('title')
         start_date = data.get('start_date')
         end_date = data.get('end_date')
         description = data.get('description', '')
         
-        if not all([user_id, title, start_date, end_date]):
+        if not all([title, start_date, end_date]):
             return jsonify({'code': -1, 'msg': '缺少必要参数'})
         
         # 创建旅行计划
@@ -81,11 +91,19 @@ def add_plan_item():
 
 @app.route('/api/plan/list', methods=['GET'])
 def get_plans():
-    """获取用户的旅行计划列表"""
+    """获取用户的旅行计划列表 (从请求头获取openid)"""
     try:
-        user_id = request.args.get('user_id')
-        if not user_id:
-            return jsonify({'code': -1, 'msg': '缺少用户ID参数'})
+        # 从请求头获取openid
+        openid = request.headers.get('x-wx-openid', '')
+        if not openid:
+            return jsonify({'code': -1, 'msg': '缺少用户标识'})
+        
+        # 根据openid查询用户
+        user = get_user_by_openid(openid)
+        if not user:
+            return jsonify({'code': -1, 'msg': '用户不存在'})
+        
+        user_id = user.id
         
         plans = TravelPlan.query.filter_by(user_id=user_id).all()
         
@@ -110,11 +128,27 @@ def get_plans():
 
 @app.route('/api/plan/<int:plan_id>', methods=['GET'])
 def get_plan_detail(plan_id):
-    """获取旅行计划详情"""
+    """获取旅行计划详情 (从请求头获取openid)"""
     try:
+        # 从请求头获取openid
+        openid = request.headers.get('x-wx-openid', '')
+        if not openid:
+            return jsonify({'code': -1, 'msg': '缺少用户标识'})
+        
+        # 根据openid查询用户
+        user = get_user_by_openid(openid)
+        if not user:
+            return jsonify({'code': -1, 'msg': '用户不存在'})
+        
+        user_id = user.id
+        
         plan = TravelPlan.query.get(plan_id)
         if not plan:
             return jsonify({'code': -1, 'msg': '旅行计划不存在'})
+        
+        # 验证该计划是否属于当前用户
+        if plan.user_id != user_id:
+            return jsonify({'code': -1, 'msg': '无权查看该行程'})
         
         # 获取计划项目
         items = TravelPlanItem.query.filter_by(plan_id=plan_id).all()
