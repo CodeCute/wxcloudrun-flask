@@ -33,7 +33,7 @@ def get_news_list():
             query = query.filter_by(category=category)
         
         # 按创建时间倒序排序并分页
-        news_list = query.order_by(News.created_at.desc()).paginate(
+        news_list = query.order_by(News.createdAt.desc()).paginate(
             page=page, per_page=page_size
         )
         
@@ -57,7 +57,7 @@ def get_news_list():
                 'view_count': news.view_count,
                 'like_count': news.like_count,
                 'comment_count': news.comment_count,
-                'created_at': news.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'created_at': news.createdAt.strftime('%Y-%m-%d %H:%M:%S'),
                 'is_liked': False
             }
             
@@ -96,8 +96,8 @@ def get_news_detail(news_id):
             'view_count': news.view_count,
             'like_count': news.like_count,
             'comment_count': news.comment_count,
-            'created_at': news.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'updated_at': news.updated_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'created_at': news.createdAt.strftime('%Y-%m-%d %H:%M:%S'),
+            'updated_at': news.updatedAt.strftime('%Y-%m-%d %H:%M:%S'),
             'is_liked': False
         }
         
@@ -207,7 +207,7 @@ def get_news_comments(news_id):
             news_id=news_id, 
             parent_id=None
         ).order_by(
-            NewsComment.created_at.desc()
+            NewsComment.createdAt.desc()
         ).paginate(
             page=page, per_page=page_size
         )
@@ -225,7 +225,7 @@ def get_news_comments(news_id):
             replies = NewsComment.query.filter_by(
                 parent_id=comment.id
             ).order_by(
-                NewsComment.created_at.asc()
+                NewsComment.createdAt.asc()
             ).all()
             
             # 格式化回复
@@ -235,7 +235,7 @@ def get_news_comments(news_id):
                     'id': reply.id,
                     'user_id': reply.user_id,
                     'content': reply.content,
-                    'created_at': reply.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                    'created_at': reply.createdAt.strftime('%Y-%m-%d %H:%M:%S')
                 })
             
             # 添加到结果列表
@@ -243,7 +243,7 @@ def get_news_comments(news_id):
                 'id': comment.id,
                 'user_id': comment.user_id,
                 'content': comment.content,
-                'created_at': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'created_at': comment.createdAt.strftime('%Y-%m-%d %H:%M:%S'),
                 'replies': formatted_replies
             })
         
@@ -302,7 +302,7 @@ def post_news_comment():
             'user_id': new_comment.user_id,
             'content': new_comment.content,
             'parent_id': new_comment.parent_id,
-            'created_at': new_comment.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            'created_at': new_comment.createdAt.strftime('%Y-%m-%d %H:%M:%S')
         }
         
         return make_succ_response(result)

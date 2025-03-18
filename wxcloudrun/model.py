@@ -113,7 +113,7 @@ class TravelPlanItem(db.Model):
 
 # 资讯/动态表
 class News(db.Model):
-    __tablename__ = 'news'
+    __tablename__ = 'News'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -124,19 +124,19 @@ class News(db.Model):
     view_count = db.Column(db.Integer, default=0, comment='浏览次数')
     like_count = db.Column(db.Integer, default=0, comment='点赞数')
     comment_count = db.Column(db.Integer, default=0, comment='评论数')
-    created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
-    updated_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now(), onupdate=datetime.now())
+    created_at = db.Column('createdAt', db.TIMESTAMP, nullable=False, default=datetime.now())
+    updated_at = db.Column('updatedAt', db.TIMESTAMP, nullable=False, default=datetime.now())
 
 
 # 资讯点赞表
 class NewsLike(db.Model):
-    __tablename__ = 'news_likes'
+    __tablename__ = 'NewsLikes'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    news_id = db.Column(db.Integer, db.ForeignKey('news.id', ondelete='CASCADE'), nullable=False)
+    news_id = db.Column(db.Integer, db.ForeignKey('News.id', ondelete='CASCADE'), nullable=False)
     user_id = db.Column(db.String(50), nullable=False, comment='用户ID')
-    created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
+    created_at = db.Column('createdAt', db.TIMESTAMP, nullable=False, default=datetime.now())
     
     # 添加唯一约束
     __table_args__ = (
@@ -147,30 +147,30 @@ class NewsLike(db.Model):
 
 # 资讯评论表
 class NewsComment(db.Model):
-    __tablename__ = 'news_comments'
+    __tablename__ = 'NewsComments'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    news_id = db.Column(db.Integer, db.ForeignKey('news.id', ondelete='CASCADE'), nullable=False)
+    news_id = db.Column(db.Integer, db.ForeignKey('News.id', ondelete='CASCADE'), nullable=False)
     user_id = db.Column(db.String(50), nullable=False, comment='评论用户ID')
     content = db.Column(db.Text, nullable=False, comment='评论内容')
-    parent_id = db.Column(db.Integer, db.ForeignKey('news_comments.id', ondelete='SET NULL'), comment='父评论ID')
-    created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
+    parent_id = db.Column(db.Integer, db.ForeignKey('NewsComments.id', ondelete='SET NULL'), comment='父评论ID')
+    created_at = db.Column('createdAt', db.TIMESTAMP, nullable=False, default=datetime.now())
 
 
 # 向导标签表
 class CompanionTag(db.Model):
-    __tablename__ = 'companion_tags'
+    __tablename__ = 'CompanionTags'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50), nullable=False, comment='标签名称')
-    created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
+    created_at = db.Column('createdAt', db.TIMESTAMP, nullable=False, default=datetime.now())
 
 
 # 向导表
 class Companion(db.Model):
-    __tablename__ = 'companions'
+    __tablename__ = 'Companions'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -185,61 +185,61 @@ class Companion(db.Model):
     languages = db.Column(db.String(255), comment='语言能力')
     rating = db.Column(db.DECIMAL(3, 2), default=5.00, comment='评分')
     review_count = db.Column(db.Integer, default=0, comment='评价数量')
-    status = db.Column(db.TINYINT, default=1, comment='状态：1活跃，0非活跃')
-    created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
-    updated_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now(), onupdate=datetime.now())
+    status = db.Column(db.SmallInteger, default=1, comment='状态：1活跃，0非活跃')
+    created_at = db.Column('createdAt', db.TIMESTAMP, nullable=False, default=datetime.now())
+    updated_at = db.Column('updatedAt', db.TIMESTAMP, nullable=False, default=datetime.now())
 
 
 # 向导标签关系表
 class CompanionTagRelation(db.Model):
-    __tablename__ = 'companion_tag_relations'
+    __tablename__ = 'CompanionTagRelations'
     __table_args__ = {'extend_existing': True}
     
-    companion_id = db.Column(db.Integer, db.ForeignKey('companions.id', ondelete='CASCADE'), primary_key=True)
-    tag_id = db.Column(db.Integer, db.ForeignKey('companion_tags.id', ondelete='CASCADE'), primary_key=True)
+    companion_id = db.Column(db.Integer, db.ForeignKey('Companions.id', ondelete='CASCADE'), primary_key=True)
+    tag_id = db.Column(db.Integer, db.ForeignKey('CompanionTags.id', ondelete='CASCADE'), primary_key=True)
 
 
 # 向导预约表
 class CompanionReservation(db.Model):
-    __tablename__ = 'companion_reservations'
+    __tablename__ = 'CompanionReservations'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    companion_id = db.Column(db.Integer, db.ForeignKey('companions.id', ondelete='CASCADE'), nullable=False)
+    companion_id = db.Column(db.Integer, db.ForeignKey('Companions.id', ondelete='CASCADE'), nullable=False)
     user_id = db.Column(db.String(50), nullable=False, comment='用户ID')
     start_date = db.Column(db.Date, nullable=False, comment='开始日期')
     end_date = db.Column(db.Date, nullable=False, comment='结束日期')
     traveler_count = db.Column(db.Integer, nullable=False, default=1, comment='旅行人数')
     special_needs = db.Column(db.Text, comment='特殊需求')
-    status = db.Column(db.TINYINT, default=0, comment='状态：0待确认，1已确认，2已完成，3已取消')
-    created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
-    updated_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now(), onupdate=datetime.now())
+    status = db.Column(db.SmallInteger, default=0, comment='状态：0待确认，1已确认，2已完成，3已取消')
+    created_at = db.Column('createdAt', db.TIMESTAMP, nullable=False, default=datetime.now())
+    updated_at = db.Column('updatedAt', db.TIMESTAMP, nullable=False, default=datetime.now())
 
 
 # 向导评价表
 class CompanionReview(db.Model):
-    __tablename__ = 'companion_reviews'
+    __tablename__ = 'CompanionReviews'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    reservation_id = db.Column(db.Integer, db.ForeignKey('companion_reservations.id', ondelete='CASCADE'), nullable=False)
+    reservation_id = db.Column(db.Integer, db.ForeignKey('CompanionReservations.id', ondelete='CASCADE'), nullable=False)
     user_id = db.Column(db.String(50), nullable=False, comment='用户ID')
-    companion_id = db.Column(db.Integer, db.ForeignKey('companions.id', ondelete='CASCADE'), nullable=False)
+    companion_id = db.Column(db.Integer, db.ForeignKey('Companions.id', ondelete='CASCADE'), nullable=False)
     rating = db.Column(db.DECIMAL(3, 2), nullable=False, comment='评分')
     content = db.Column(db.Text, comment='评价内容')
     images = db.Column(db.Text, comment='图片URLs，逗号分隔')
-    created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
+    created_at = db.Column('createdAt', db.TIMESTAMP, nullable=False, default=datetime.now())
 
 
 # 用户关注表
 class UserFollow(db.Model):
-    __tablename__ = 'user_follows'
+    __tablename__ = 'UserFollows'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     follower_id = db.Column(db.String(50), nullable=False, comment='关注者ID')
     following_id = db.Column(db.String(50), nullable=False, comment='被关注者ID')
-    created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
+    created_at = db.Column('createdAt', db.TIMESTAMP, nullable=False, default=datetime.now())
     
     # 添加唯一约束
     __table_args__ = (
@@ -250,7 +250,7 @@ class UserFollow(db.Model):
 
 # 旅行解决方案表
 class Solution(db.Model):
-    __tablename__ = 'solutions'
+    __tablename__ = 'Solutions'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -260,29 +260,29 @@ class Solution(db.Model):
     content = db.Column(db.Text, nullable=False, comment='解决方案内容')
     duration = db.Column(db.Integer, comment='天数')
     price_estimate = db.Column(db.DECIMAL(10, 2), comment='估算价格')
-    difficulty = db.Column(db.TINYINT, default=1, comment='难度：1-5，5为最难')
+    difficulty = db.Column(db.SmallInteger, default=1, comment='难度：1-5，5为最难')
     view_count = db.Column(db.Integer, default=0, comment='浏览次数')
     apply_count = db.Column(db.Integer, default=0, comment='应用次数')
-    created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
-    updated_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now(), onupdate=datetime.now())
+    created_at = db.Column('createdAt', db.TIMESTAMP, nullable=False, default=datetime.now())
+    updated_at = db.Column('updatedAt', db.TIMESTAMP, nullable=False, default=datetime.now())
 
 
 # 解决方案应用表
 class SolutionApplication(db.Model):
-    __tablename__ = 'solution_applications'
+    __tablename__ = 'SolutionApplications'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    solution_id = db.Column(db.Integer, db.ForeignKey('solutions.id', ondelete='CASCADE'), nullable=False)
+    solution_id = db.Column(db.Integer, db.ForeignKey('Solutions.id', ondelete='CASCADE'), nullable=False)
     user_id = db.Column(db.String(50), nullable=False, comment='用户ID')
     travel_date = db.Column(db.Date, comment='旅行日期')
     notes = db.Column(db.Text, comment='备注')
-    created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
+    created_at = db.Column('createdAt', db.TIMESTAMP, nullable=False, default=datetime.now())
 
 
 # 反馈表
 class Feedback(db.Model):
-    __tablename__ = 'feedbacks'
+    __tablename__ = 'Feedbacks'
     __table_args__ = {'extend_existing': True}
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -291,9 +291,9 @@ class Feedback(db.Model):
     content = db.Column(db.Text, nullable=False, comment='反馈内容')
     contact = db.Column(db.String(100), comment='联系方式')
     images = db.Column(db.Text, comment='图片URLs，逗号分隔')
-    status = db.Column(db.TINYINT, default=0, comment='状态：0未处理，1处理中，2已处理')
-    created_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now())
-    updated_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.now(), onupdate=datetime.now())
+    status = db.Column(db.SmallInteger, default=0, comment='状态：0未处理，1处理中，2已处理')
+    created_at = db.Column('createdAt', db.TIMESTAMP, nullable=False, default=datetime.now())
+    updated_at = db.Column('updatedAt', db.TIMESTAMP, nullable=False, default=datetime.now())
 
 
 # 关于我们信息表
