@@ -1,15 +1,9 @@
-from flask import Blueprint, jsonify
+from flask import jsonify
 from wxcloudrun import app, db
 import json
 import os
 
-# 创建蓝图
-initialize_bp = Blueprint('initialize', __name__)
-
-# 注册蓝图
-app.register_blueprint(initialize_bp, url_prefix='/api/initialize')
-
-@initialize_bp.route('/status', methods=['GET'])
+@app.route('/api/initialize/status', methods=['GET'])
 def initialization_status():
     """获取初始化状态"""
     try:
@@ -37,7 +31,7 @@ def initialization_status():
     except Exception as e:
         return jsonify({'code': -1, 'msg': str(e)})
 
-@initialize_bp.route('/data', methods=['POST'])
+@app.route('/api/initialize/data', methods=['POST'])
 def initialize_data():
     """初始化数据"""
     try:
@@ -53,7 +47,7 @@ def initialize_data():
     except Exception as e:
         return jsonify({'code': -1, 'msg': str(e)})
 
-@initialize_bp.route('/reset', methods=['POST'])
+@app.route('/api/initialize/reset', methods=['POST'])
 def reset_data():
     """重置数据（危险操作）"""
     try:

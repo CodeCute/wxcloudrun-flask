@@ -1,14 +1,10 @@
-from flask import Blueprint, request, jsonify
+from flask import request, jsonify
 from wxcloudrun import app, db
 from wxcloudrun.model import Favorite, Attraction, TravelGuide
+from wxcloudrun.dao import get_user_by_openid, get_attraction_by_id, get_travel_guide_by_id, get_user_favorites
+from wxcloudrun.common.response import make_succ_response, make_err_response
 
-# 创建蓝图
-favorite_bp = Blueprint('favorite', __name__)
-
-# 注册蓝图
-app.register_blueprint(favorite_bp, url_prefix='/api/favorite')
-
-@favorite_bp.route('/add', methods=['POST'])
+@app.route('/api/favorite/add', methods=['POST'])
 def add_favorite():
     """添加收藏"""
     try:
@@ -48,7 +44,7 @@ def add_favorite():
         db.session.rollback()
         return jsonify({'code': -1, 'msg': str(e)})
 
-@favorite_bp.route('/remove', methods=['POST'])
+@app.route('/api/favorite/remove', methods=['POST'])
 def remove_favorite():
     """取消收藏"""
     try:
@@ -75,7 +71,7 @@ def remove_favorite():
         db.session.rollback()
         return jsonify({'code': -1, 'msg': str(e)})
 
-@favorite_bp.route('/list', methods=['GET'])
+@app.route('/api/favorite/list', methods=['GET'])
 def get_favorites():
     """获取用户收藏列表"""
     try:
@@ -129,4 +125,65 @@ def get_favorites():
         return jsonify(result)
     
     except Exception as e:
-        return jsonify({'code': -1, 'msg': str(e)}) 
+        return jsonify({'code': -1, 'msg': str(e)})
+
+@app.route('/api/favorites', methods=['GET'])
+def get_user_favorites_api():
+    """
+    获取用户收藏列表
+    从请求头获取用户ID
+    """
+    # 从请求头获取openid
+    openid = request.headers.get('x-wx-openid', '')
+    if not openid:
+        return make_err_response('缺少用户标识')
+    
+    # 根据openid查询用户ID
+    user = get_user_by_openid(openid)
+    if not user:
+        return make_err_response('用户不存在')
+    
+    user_id = user.id
+    type = request.args.get('type')  # 可选，筛选收藏类型
+    
+    # 获取用户收藏
+    favorites = get_user_favorites(user_id, type)
+    
+    # 构建响应数据
+    favorite_list = []
+    for fav in favorites:
+        item_info = None
+        
+        # 获取收藏项目详情
+        if fav.type == 'attraction':
+            attraction = get_attraction_by_id(fav.item_id)
+            if attraction:
+                item_info = {
+                    'id': attraction.id,
+                    'name': attraction.name,
+                    'coverImage': attraction.cover_image,
+                    'description': attraction.description,
+                    'address': attraction.address,
+                    'category': attraction.category
+                }
+        elif fav.type == 'guide':
+            guide = get_travel_guide_by_id(fav.item_id)
+            if guide:
+                item_info = {
+                    'id': guide.id,
+                    'title': guide.title,
+                    'coverImage': guide.cover_image,
+                    'description': guide.description,
+                    'author': guide.author
+                }
+        
+        if item_info:
+            favorite_list.append({
+                'id': fav.id,
+                'type': fav.type,
+                'itemId': fav.item_id,
+                'item': item_info,
+                'createdAt': fav.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            })
+    
+    return make_succ_response(favorite_list) 

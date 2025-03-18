@@ -10,17 +10,22 @@ def user_login():
     """
     用户登录接口
     前端通过 wx.login() 获取 code，后端通过 code 换取 openid
+    或直接从请求头获取微信云托管环境提供的openid
     """
     params = request.get_json()
     
-    # 小程序登录
-    if 'code' not in params:
-        return make_err_response('缺少code参数')
+    # 尝试从请求头获取openid（微信云托管环境会自动注入）
+    openid = request.headers.get('x-wx-openid', '')
     
-    code = params['code']
-    # 实际项目中，这里应该调用微信的api获取openid
-    # 此处仅作为示例，使用code作为openid
-    openid = code
+    # 如果请求头中没有openid，则使用传统方式（code换取openid）
+    if not openid and 'code' in params:
+        code = params['code']
+        # 实际项目中，这里应该调用微信的api获取openid
+        # 此处仅作为示例，使用code作为openid
+        openid = code
+    
+    if not openid:
+        return make_err_response('无法获取用户标识')
     
     # 查询用户是否存在，不存在则创建用户
     user = get_user_by_openid(openid)
@@ -61,13 +66,15 @@ def user_login():
 def update_user_info():
     """
     更新用户信息
+    从请求头获取openid
     """
     params = request.get_json()
     
-    if 'openid' not in params:
+    # 从请求头获取openid
+    openid = request.headers.get('x-wx-openid', '')
+    if not openid:
         return make_err_response('缺少openid参数')
     
-    openid = params['openid']
     user = get_user_by_openid(openid)
     if user is None:
         return make_err_response('用户不存在')
@@ -99,8 +106,10 @@ def update_user_info():
 def get_user_info():
     """
     获取用户信息
+    从请求头中获取openid
     """
-    openid = request.args.get('openid', '')
+    # 从请求头中获取openid
+    openid = request.headers.get('x-wx-openid', '')
     if not openid:
         return make_err_response('缺少openid参数')
     

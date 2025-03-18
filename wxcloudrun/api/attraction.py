@@ -1,14 +1,8 @@
-from flask import Blueprint, request, jsonify
+from flask import request, jsonify
 from wxcloudrun import app, db
 from wxcloudrun.model import Attraction
 
-# 创建蓝图
-attraction_bp = Blueprint('attraction', __name__)
-
-# 注册蓝图
-app.register_blueprint(attraction_bp, url_prefix='/api/attraction')
-
-@attraction_bp.route('/list', methods=['GET'])
+@app.route('/api/attraction/list', methods=['GET'])
 def get_attractions():
     """获取景点列表"""
     try:
@@ -49,7 +43,7 @@ def get_attractions():
     except Exception as e:
         return jsonify({'code': -1, 'msg': str(e)})
 
-@attraction_bp.route('/<int:attraction_id>', methods=['GET'])
+@app.route('/api/attraction/<int:attraction_id>', methods=['GET'])
 def get_attraction(attraction_id):
     """获取景点详情"""
     try:

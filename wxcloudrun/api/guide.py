@@ -1,7 +1,7 @@
 from flask import request
 from run import app
 from wxcloudrun.dao import get_travel_guides, get_travel_guide_by_id, create_travel_guide
-from wxcloudrun.dao import get_user_favorites
+from wxcloudrun.dao import get_user_favorites, get_user_by_openid
 from wxcloudrun.models import TravelGuide
 from wxcloudrun.common.response import make_succ_response, make_err_response
 
@@ -44,13 +44,19 @@ def get_guide_detail(guide_id):
     
     # 检查用户是否已收藏
     is_favorite = False
-    user_id = request.args.get('userId', '')
-    if user_id:
-        favorites = get_user_favorites(user_id, 'guide')
-        for fav in favorites:
-            if fav.item_id == guide_id:
-                is_favorite = True
-                break
+    
+    # 从请求头获取openid
+    openid = request.headers.get('x-wx-openid', '')
+    if openid:
+        # 获取用户ID
+        user = get_user_by_openid(openid)
+        if user:
+            user_id = user.id
+            favorites = get_user_favorites(user_id, 'guide')
+            for fav in favorites:
+                if fav.item_id == guide_id:
+                    is_favorite = True
+                    break
     
     result = {
         'id': guide.id,
